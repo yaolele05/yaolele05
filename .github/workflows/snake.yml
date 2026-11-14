@@ -1,0 +1,34 @@
+name: Generate Snake
+
+# 每天自动跑一次；也可以在 Actions 页面手动 Run workflow
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  snake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Generate snake SVG (pink, light + dark)
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          # 两版：浅色主题用的、深色主题用的（颜色刚好反过来，才不会在白/黑底上突兀）
+          outputs: |
+            dist/github-snake.svg?color_snake=#C2185B&color_dots=#FBE6EF,#FBD3E3,#F3A6C6,#E2669B,#C2185B
+            dist/github-snake-dark.svg?color_snake=#FF9EC4&color_dots=#21262D,#4A2036,#7A2C4E,#B13A6B,#E75480
+
+      - name: Publish to output branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: output
+          publish_dir: ./dist
+          force_orphan: true
